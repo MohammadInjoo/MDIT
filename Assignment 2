@@ -1,0 +1,100 @@
+unsigned long oneSecond = 1000UL;
+unsigned long startTime;
+int mySeconds = 0;
+int myMinutes = 0;
+int myHours = 0;
+int myDays = 0;
+#include <Servo.h>
+#include <CapacitiveSensor.h>
+CapacitiveSensor capSensor1 = CapacitiveSensor(4,2);
+CapacitiveSensor capSensor2 = CapacitiveSensor(7,5);
+Servo myservo;
+const int trigPin = 12;
+const int echoPin = 13;
+int pos = 0;
+int duration = 0;
+int distance = 0;
+
+
+void setup()
+{
+  Serial.begin(9600);
+  startTime = millis();
+
+myservo.attach(9);
+pinMode(trigPin , OUTPUT);
+pinMode(echoPin , INPUT);
+
+}
+
+void loop()
+{
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);  
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration/58.2;
+ 
+  
+   if ( distance <= 40 )
+  {
+      for (pos = 0; pos <= 90; pos += 1){
+    myservo.write(pos); 
+    delay(15);}
+  }
+ 
+  
+  long sensorValue1 = capSensor1.capacitiveSensor(30);
+  long sensorValue2 = capSensor2.capacitiveSensor(30);
+
+    Serial.print("Sensor1: ");
+    Serial.print(sensorValue1);
+    Serial.print("Sensor2: ");
+    Serial.println(sensorValue2);
+
+    int val1 = map(sensorValue1, 0, 5000, 50, 4000);
+    int val2 = map(sensorValue2, 0, 10000, 10, 1000);
+
+    tone(8,val1,20);
+    noTone;
+    delay(val2);
+    
+  if (millis() - startTime >= oneSecond)
+  {
+    displayTime();
+    mySeconds++;
+    startTime += oneSecond;
+    if (mySeconds > 59)
+    {
+      myMinutes++;
+      mySeconds = 0;
+      if (myMinutes > 59)
+      {
+        myHours++;
+        myMinutes=0;
+        if (myHours > 23)
+        {
+          myDays++;
+          myHours=0;
+        }
+      }
+    }
+  }
+  //your other code here.....
+}
+
+void displayTime()
+{
+  //Serial.print(myDays);
+  //Serial.print(":");
+  if (myHours < 10) Serial.print("0");
+  Serial.print(myHours);
+  Serial.print(":");
+  if (myMinutes < 10) Serial.print("0");
+  Serial.print(myMinutes);
+  Serial.print(":");
+  if (mySeconds < 10) Serial.print("0");
+  Serial.println(mySeconds);
+}
