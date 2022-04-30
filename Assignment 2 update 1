@@ -8,11 +8,11 @@ CapacitiveSensor capSensor2 = CapacitiveSensor(7,5); // Putting a 10Mohm between
 Servo myservo; // defining the servo motor as "myservo"
 const int trigPin = 12; // trigger pin of the ultrasonic sensor connect  to pin 12
 const int echoPin = 13;  // echo pin of the ultrasonic sensor connect  to pin 13
-int pos = 0;
-int duration = 0;
-int distance = 0;
+int pos = 0; // the start position of servo motor
+int duration = 0; // travel time of the wave produced and recieved back by the ultrasonic sensor, pin 0  is for commiunication. we set this later in code
+int distance = 0; // distance of the object, pin 0 is for commiunication. we set this later in code
 
-unsigned long oneSecond = 1000UL;
+unsigned long oneSecond = 1000UL; 
 unsigned long startTime;
 int mySeconds = 0;
 int myMinutes = 0;
@@ -23,26 +23,25 @@ int myDays = 0;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(9600); // Serial Communication is starting with 9600 of baudrate speed.
   startTime = millis(); // check on performance in milliseconds
 
 myservo.attach(9); // Servo is attached to pin 9
-pinMode(trigPin , OUTPUT); // Ultrasonic sensor trigger pin, sender
-pinMode(echoPin , INPUT); // Ultrasonic sensor echo pin, reciever
+pinMode(trigPin , OUTPUT); // Ultrasonic sensor trigger pin, sender.  Sets the trigPin as an OUTPUT
+pinMode(echoPin , INPUT); // Ultrasonic sensor echo pin, reciever. Sets the echoPin as an INPUT
 
 }
 
 void loop()
 {
-  digitalWrite(trigPin, LOW);
+  digitalWrite(trigPin, LOW); // Clears the trigPin condition
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(10); // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
   digitalWrite(trigPin, LOW);  
-  duration = pulseIn(echoPin, HIGH);
-  distance = duration/58.2;
+  duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
+  distance = duration * 0.034 / 2 ; // Calculating the distance. Speed of sound wave divided by 2 (go and back)
  
-  
    if ( distance <= 40 ) //  is true if distance is smaller than or equal to 40cm. 
   {
       for (pos = 0; pos <= 90; pos += 1){
