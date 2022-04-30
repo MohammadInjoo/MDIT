@@ -1,20 +1,24 @@
+// materials used in this project : 1x Ardunio UNO R 3,,,,,,,,2x 10Mohm resistors,,,,1x Ultrasonic sensor HC-SR04,,,,,,1x Servo Motor,,,,
+// 2x breadboards,,,,,,,,,, 1x miniSpeakr,,,,,,,,,2x Metal object,,,,,, 25x male to male jumper wires
+// Designed by Seyed Mohammad Enjavi Amiri for MTI assignment2 April 2022
+
 #include <CapacitiveSensor.h> //  #include is used to include outside libraries in your sketch. This one is for using capacitive sensors.
 #include <Servo.h> // #include is used to include outside libraries in your sketch. This one is for running servo motors.
 
 
-CapacitiveSensor capSensor1 = CapacitiveSensor(4,2); // Putting a 10Mohm between pin 4 and  2, connect it(2) to Aluminum plate
-CapacitiveSensor capSensor2 = CapacitiveSensor(7,5); // Putting a 10Mohm between pin 7 and  5, connect it(5) to a Metal object
+CapacitiveSensor capSensor1 = CapacitiveSensor(4,2); // Putting a 10Mohm between pin 4 and  2, connect it(2) to Aluminum plate. pin2 is reciever(sensor pin).
+CapacitiveSensor capSensor2 = CapacitiveSensor(7,5); // Putting a 10Mohm between pin 7 and  5, connect it(5) to a Metal object. pin 5 is reciever.
 
 Servo myservo; // defining the servo motor as "myservo"
-const int trigPin = 12; // trigger pin of the ultrasonic sensor connect  to pin 12
+const int trigPin = 12; // trigger pin of the ultrasonic sensor (HC-SR04) connect  to pin 12
 const int echoPin = 13;  // echo pin of the ultrasonic sensor connect  to pin 13
 int pos = 0; // the start position of servo motor
 int duration = 0; // travel time of the wave produced and recieved back by the ultrasonic sensor, pin 0  is for commiunication. we set this later in code
 int distance = 0; // distance of the object, pin 0 is for commiunication. we set this later in code
 
-unsigned long oneSecond = 1000UL; 
-unsigned long startTime;
-int mySeconds = 0;
+unsigned long oneSecond = 1000UL; // define one second as 1000 millisecond, with UL after the first constant, all the rest of the math will perform as unsigned long.
+unsigned long startTime;  // Unsigned long variables are extended size variables for number storage. unsigned long var = val.   var= variable name,  val= the value you assign to that variable.
+int mySeconds = 0; // creates a variable integer called 'mySecond'
 int myMinutes = 0;
 int myHours = 0;
 int myDays = 0;
@@ -41,44 +45,47 @@ void loop()
   digitalWrite(trigPin, LOW);  
   duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
   distance = duration * 0.034 / 2 ; // Calculating the distance. Speed of sound wave divided by 2 (go and back)
+  Serial.print("Distance: "); // Type the distance in serial monitor.
+  Serial.print(distance); 
+  Serial.println(" cm"); // type the distance in centimetre
  
-   if ( distance <= 40 ) //  is true if distance is smaller than or equal to 40cm. 
+   if ( distance <= 40 ) //  is true if distance of a person/object is smaller than or equal to 40cm. 
   {
-      for (pos = 0; pos <= 90; pos += 1){
-    myservo.write(pos); 
-    delay(1000);}
-  } // If someone approach the sensor equall or closer than 40cm, the servo motor start from 0position to 90position(angle), and then it will come back to pos0, in 90seconds, each step takes 1 second
+      for (pos = 0; pos <= 90; pos += 1){ // the servo start to move from pos 0 to pos 90. Rotating 90 degree
+    myservo.write(pos); // tell servo to go to position in variable 'pos'
+    delay(1000);}  // it will come back to pos0, in 90seconds, each step takes 1 second
+  } 
  
   
-  long sensorValue1 = capSensor1.capacitiveSensor(30);
-  long sensorValue2 = capSensor2.capacitiveSensor(30);
+  long sensorValue1 = capSensor1.capacitiveSensor(30); // byte samples. capacitiveSensor requires one parameter, samples, and returns
+  long sensorValue2 = capSensor2.capacitiveSensor(30); //  a long containing the added (sensed) capacitance, in arbitrary units.
 
-    Serial.print("Sensor1: ");
+    Serial.print("Sensor1: "); // print in serial monitor, the amount of sensed capacitance.
     Serial.print(sensorValue1);
     Serial.print("Sensor2: ");
     Serial.println(sensorValue2);
 
-    int val1 = map(sensorValue1, 0, 5000, 50, 4000);
+    int val1 = map(sensorValue1, 0, 5000, 50, 4000); // converting the amount od sensed capacitance to sound wave in speaker. scale th  values
     int val2 = map(sensorValue2, 0, 10000, 10, 1000);
 
     tone(8,val1,20); // Generates a square wave of the specified frequency (and 50% duty cycle) on a pin. tone(pin, frequency, duration), 
     noTone; // Stops the generation of a square wave triggered by tone(8,val1,20).
     delay(val2); // stops when approaching to the val2 pin.
     
-  if (millis() - startTime >= oneSecond)
+  if (millis() - startTime >= oneSecond) // start the time of playing with 00:00:00 style.
   {
     displayTime();
-    mySeconds++;
-    startTime += oneSecond;
-    if (mySeconds > 59)
+    mySeconds++; // defining seconds, adds 1 to the mySeconds int on every loop
+    startTime += oneSecond; 
+    if (mySeconds > 59) //  defining minutes
     {
       myMinutes++;
       mySeconds = 0;
-      if (myMinutes > 59)
+      if (myMinutes > 59) // defining houres
       {
         myHours++;
         myMinutes=0;
-        if (myHours > 23)
+        if (myHours > 23) // defining days
         {
           myDays++;
           myHours=0;
@@ -89,10 +96,10 @@ void loop()
   
 }
 
-void displayTime()
+void displayTime() //   Time displaying on  serial monitor
 {
   
-  if (myHours < 10) Serial.print("0");
+  if (myHours < 10) Serial.print("0"); 
   Serial.print(myHours);
   Serial.print(":");
   if (myMinutes < 10) Serial.print("0");
